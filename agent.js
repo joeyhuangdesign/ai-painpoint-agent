@@ -209,10 +209,13 @@ Return ONLY valid JSON in this exact structure (no markdown, no preamble):
   ]
 }`;
 
+  // Debug: confirm key is present (shows first 10 chars only)
+  log(`🔑 API key present: ${ANTHROPIC_API_KEY ? "YES (" + ANTHROPIC_API_KEY.slice(0, 10) + "...)" : "NO - KEY IS MISSING"}`);
+
   const response = await httpsPost(
     "https://api.anthropic.com/v1/messages",
     {
-      model: "claude-opus-4-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 2000,
       system: systemPrompt,
       messages: [{ role: "user", content: `Analyze these ${posts.length} posts and return the top 10 AI workflow pain points:\n\n${postText}` }],
@@ -222,6 +225,12 @@ Return ONLY valid JSON in this exact structure (no markdown, no preamble):
       "anthropic-version": "2023-06-01",
     }
   );
+
+  // Log full response if something looks wrong
+  if (response.error || !response.content) {
+    log(`❌ API error response: ${JSON.stringify(response)}`);
+    throw new Error(`API returned error: ${JSON.stringify(response)}`);
+  }
 
   const text = response.content?.map((b) => b.text || "").join("") || "";
   const clean = text.replace(/```json|```/g, "").trim();
