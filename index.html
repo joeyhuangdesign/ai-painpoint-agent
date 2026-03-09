@@ -366,8 +366,8 @@
     if (!allData) return;
     const rows = [["Rank","Title","Industry","Severity","Frequency","Tools","Description"]];
     allData.painpoints.forEach(p => {
-      rows.push([p.rank, `"${p.title}"`, p.industry, p.severity, p.frequency,
-        `"${(p.tools_affected||[]).join(", ")}"`, `"${p.description}"`]);
+      const tools = (p.tools_affected||[]).join(", ");
+      rows.push([p.rank, '"'+p.title+'"', p.industry, p.severity, p.frequency, '"'+tools+'"', '"'+p.description+'"']);
     });
     download("painpoints.csv", rows.map(r => r.join(",")).join("\n"), "text/csv");
   }
