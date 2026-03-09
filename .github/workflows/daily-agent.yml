@@ -1,0 +1,35 @@
+name: Daily AI Pain Point Agent
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Pain Point Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: node agent.js
+
+      - name: Commit results
+        run: |
+          git config user.name "AI Pain Point Bot"
+          git config user.email "bot@github-actions"
+          git add results/
+          git diff --staged --quiet || git commit -m "📊 Daily pain point report $(date +%Y-%m-%d)"
+          git push
