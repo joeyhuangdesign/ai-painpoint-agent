@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Pain Point Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070f;
+      --surface: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+      --text: #e2e2f0;
+      --muted: rgba(255,255,255,0.35);
+      --accent: #7c6fff;
+      --accent2: #ff6b9d;
+      --green: #2ed573;
+      --orange: #ffa502;
+      --red: #ff4757;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,111,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,111,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+
+    /* Header */
+    header { margin-bottom: 40px; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 6px; }
+    .badge { display: flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 5vw, 42px); font-weight: 800; line-height: 1.05; letter-spacing: -1px; }
+    h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: var(--muted); font-size: 14px; margin-top: 10px; font-family: 'DM Mono', monospace; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .stat-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+    .stat-value { font-size: 26px; font-weight: 700; font-family: 'Syne', sans-serif; }
+
+    /* Summary */
+    .summary-box { background: rgba(124,111,255,0.07); border: 1px solid rgba(124,111,255,0.2); border-radius: 12px; padding: 18px 22px; margin-bottom: 28px; }
+    .summary-box .label { color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+    .summary-box p { color: #c0c0dc; font-size: 14px; line-height: 1.7; }
+
+    /* Theme banner */
+    .theme-banner { background: rgba(255,107,157,0.07); border: 1px solid rgba(255,107,157,0.2); border-radius: 10px; padding: 12px 18px; margin-bottom: 28px; display: flex; gap: 10px; align-items: center; }
+    .theme-banner span { font-size: 18px; }
+    .theme-banner p { color: #ffb3ce; font-size: 13px; line-height: 1.5; }
+
+    /* Filters */
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .filter-label { color: var(--muted); font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+    .filter-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .filter-btn:hover, .filter-btn.active { background: rgba(124,111,255,0.2); border-color: rgba(124,111,255,0.5); color: #fff; }
+
+    /* Export */
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .export-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.2s; }
+    .export-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .results-count { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; }
+
+    /* Cards */
+    .cards { display: flex; flex-direction: column; gap: 10px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; cursor: pointer; transition: background 0.2s; border-left: 3px solid transparent; }
+    .card:hover { background: rgba(255,255,255,0.05); }
+    .card.open { background: rgba(255,255,255,0.05); }
+
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .card-left { flex: 1; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tag { border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600; border: 1px solid; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 10px; }
+    .rank { color: var(--muted); }
+
+    /* Severity bar */
+    .severity-row { display: flex; align-items: center; gap: 8px; }
+    .severity-track { flex: 1; height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+    .severity-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+    .severity-num { font-size: 11px; font-weight: 700; min-width: 18px; font-family: 'DM Mono', monospace; }
+    .chevron { color: var(--muted); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
+    .card.open .chevron { transform: rotate(180deg); }
+
+    /* Card body */
+    .card-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: none; }
+    .card.open .card-body { display: block; }
+    .card-desc { color: #a8a8c0; font-size: 13px; line-height: 1.7; margin-bottom: 14px; }
+
+    .detail-row { margin-bottom: 10px; }
+    .detail-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-family: 'DM Mono', monospace; margin-bottom: 5px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { background: rgba(124,111,255,0.15); color: #a09aff; border-radius: 5px; padding: 3px 9px; font-size: 12px; }
+
+    blockquote { border-left: 2px solid var(--border); padding-left: 12px; color: #777788; font-size: 12px; font-style: italic; line-height: 1.6; margin-top: 10px; }
+
+    .source-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .source-pill { font-size: 12px; }
+
+    /* Trend section */
+    .section-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; margin-top: 40px; }
+    .trend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .trend-date { color: var(--muted); font-size: 11px; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+    .trend-theme { color: var(--text); font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+    .trend-meta { display: flex; gap: 12px; }
+    .trend-meta span { color: var(--muted); font-size: 11px; font-family: 'DM Mono', monospace; }
+
+    /* Loading / error */
+    .loading { text-align: center; padding: 80px 20px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .loading-spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.2); border-radius: 12px; padding: 20px; text-align: center; color: #ff8090; font-size: 14px; }
+
+    /* Footer */
+    footer { margin-top: 60px; text-align: center; color: rgba(255,255,255,0.12); font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-top">
+      <div class="badge"><div class="dot"></div> Live · Updates Daily at 8AM UTC</div>
+      <div id="last-updated" style="color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;"></div>
+    </div>
+    <h1>AI Pain Point<br><span>Intelligence</span></h1>
+    <p class="subtitle">Monitoring Reddit · Hacker News · GitHub · daily</p>
+  </header>
+
+  <div id="app">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      Loading latest results...
+    </div>
+  </div>
+
+  <div id="trend-section" style="display:none">
+    <div class="section-title">📈 Trend History</div>
+    <div class="trend-grid" id="trend-grid"></div>
+  </div>
+
+  <footer>AI PAIN POINT INTELLIGENCE · POWERED BY CLAUDE · GITHUB PAGES</footer>
+</div>
+
+<script>
+  // ── Config ────────────────────────────────────────────────
+  // IMPORTANT: Replace YOUR-USERNAME with your GitHub username
+  const GITHUB_USER = "joeyhuangdesign";
+  const GITHUB_REPO = "ai-painpoint-agent";
+  const RESULTS_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/results`;
+
+  // ── Industry colors ───────────────────────────────────────
+  const IND_COLORS = {
+    Engineering: "#6c63ff", Marketing: "#ff6b9d", Healthcare: "#00d2d3",
+    Finance: "#ffd32a", Education: "#0be881", Design: "#ff9f43",
+    Legal: "#c8d6e5", Sales: "#ff6348", General: "#a4b0be"
+  };
+
+  const SOURCE_ICONS = {
+    "Reddit": "🟠", "Hacker News": "🔶", "GitHub": "⚫",
+    "X / Twitter": "🐦", "Stack Overflow": "🔸", "Dev.to": "🟣"
+  };
+
+  // ── State ─────────────────────────────────────────────────
+  let allData = null;
+  let activeFilter = "All";
+  const INDUSTRIES = ["All","Engineering","Marketing","Healthcare","Finance","Education","Design","Legal","Sales","General"];
+
+  // ── Fetch latest.json ─────────────────────────────────────
+  async function loadData() {
+    try {
+      const res = await fetch(`${RESULTS_BASE}/latest.json?_=${Date.now()}`);
+      if (!res.ok) throw new Error("Not found");
+      allData = await res.json();
+      render(allData);
+      loadTrends();
+    } catch(e) {
+      document.getElementById("app").innerHTML = `
+        <div class="error-box">
+          ⚠️ Could not load results.<br><br>
+          Make sure the agent has run at least once and <code>results/latest.json</code> exists in your repo.<br><br>
+          <small style="opacity:0.6">${e.message}</small>
+        </div>`;
+    }
+  }
+
+  // ── Render main dashboard ─────────────────────────────────
+  function render(data) {
+    const filtered = activeFilter === "All"
+      ? data.painpoints
+      : data.painpoints.filter(p => p.industry === activeFilter);
+
+    const avgSev = data.painpoints.length
+      ? (data.painpoints.reduce((a,b) => a + b.severity, 0) / data.painpoints.length).toFixed(1)
+      : "—";
+    const highCount = data.painpoints.filter(p => p.severity >= 8).length;
+
+    document.getElementById("last-updated").textContent = `Last run: ${data.date}`;
+
+    document.getElementById("app").innerHTML = `
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Pain Points</div>
+          <div class="stat-value" style="color:var(--accent)">${data.painpoints.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Posts Analyzed</div>
+          <div class="stat-value" style="color:var(--accent2)">${data.total_posts_analyzed}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Avg Severity</div>
+          <div class="stat-value" style="color:var(--orange)">${avgSev}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Critical (8+)</div>
+          <div class="stat-value" style="color:var(--red)">${highCount}</div>
+        </div>
+      </div>
+
+      <!-- Dominant theme -->
+      ${data.dominant_theme ? `
+      <div class="theme-banner">
+        <span>🎯</span>
+        <p><strong style="color:#ff6b9d">Dominant Theme:</strong> ${data.dominant_theme}</p>
+      </div>` : ""}
+
+      <!-- Summary -->
+      ${data.summary ? `
+      <div class="summary-box">
+        <div class="label">Executive Summary</div>
+        <p>${data.summary}</p>
+      </div>` : ""}
+
+      <!-- Filters -->
+      <div class="filters">
+        <span class="filter-label">Industry:</span>
+        ${INDUSTRIES.map(ind => `
+          <button class="filter-btn ${activeFilter === ind ? 'active' : ''}"
+            onclick="setFilter('${ind}')">${ind}</button>
+        `).join("")}
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <span class="results-count">${filtered.length} pain points</span>
+        <div style="display:flex;gap:8px">
+          <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="export-btn" onclick="exportJSON()">⬇ Export JSON</button>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="cards" id="cards">
+        ${filtered.map((p, i) => renderCard(p, i)).join("")}
+      </div>
+    `;
+  }
+
+  function renderCard(p, i) {
+    const color = IND_COLORS[p.industry] || "#888";
+    const sevColor = p.severity >= 8 ? "var(--red)" : p.severity >= 6 ? "var(--orange)" : "var(--green)";
+    const freqColor = p.frequency === "High" ? "var(--red)" : p.frequency === "Medium" ? "var(--orange)" : "var(--green)";
+
+    return `
+    <div class="card" id="card-${i}" style="border-left-color:${color}" onclick="toggleCard(${i})">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="card-tags">
+            <span class="tag" style="background:${color}22;color:${color};border-color:${color}44">${p.industry}</span>
+            <span class="tag" style="background:${freqColor}22;color:${freqColor};border-color:${freqColor}44">${p.frequency} Freq</span>
+          </div>
+          <div class="card-title"><span class="rank">#${p.rank || i+1} — </span>${p.title}</div>
+          <div class="severity-row">
+            <div class="severity-track">
+              <div class="severity-fill" style="width:${(p.severity||0)*10}%;background:${sevColor}"></div>
+            </div>
+            <span class="severity-num" style="color:${sevColor}">${p.severity}</span>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">${p.description}</p>
+        ${p.tools_affected?.length ? `
+          <div class="detail-row">
+            <div class="detail-label">Affected Tools</div>
+            <div class="chips">${p.tools_affected.map(t => `<span class="chip">${t}</span>`).join("")}</div>
+          </div>` : ""}
+        ${p.sample_quotes?.length ? `
+          <blockquote>"${p.sample_quotes[0]}"</blockquote>` : ""}
+        ${p.source_platforms?.length ? `
+          <div class="source-pills">
+            ${p.source_platforms.map(s => `<span class="source-pill">${SOURCE_ICONS[s] || "•"} ${s}</span>`).join("")}
+          </div>` : ""}
+      </div>
+    </div>`;
+  }
+
+  function toggleCard(i) {
+    document.getElementById(`card-${i}`)?.classList.toggle("open");
+  }
+
+  function setFilter(ind) {
+    activeFilter = ind;
+    render(allData);
+  }
+
+  // ── Trend history ─────────────────────────────────────────
+  async function loadTrends() {
+    // Try to fetch the last 7 days
+    const today = new Date();
+    const entries = [];
+    for (let d = 1; d <= 7; d++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - d);
+      const dateStr = date.toISOString().slice(0,10);
+      try {
+        const res = await fetch(`${RESULTS_BASE}/${dateStr}.json`);
+        if (res.ok) {
+          const data = await res.json();
+          entries.push({ date: dateStr, ...data });
+        }
+      } catch {}
+    }
+    if (entries.length > 0) {
+      document.getElementById("trend-section").style.display = "block";
+      document.getElementById("trend-grid").innerHTML = entries.map(e => `
+        <div class="trend-card">
+          <div class="trend-date">${e.date}</div>
+          <div class="trend-theme">${e.dominant_theme || "—"}</div>
+          <div class="trend-meta">
+            <span>${e.painpoints?.length || 0} pain points</span>
+            <span>${e.total_posts_analyzed || 0} posts</span>
+          </div>
+        </div>
+      `).join("");
+    }
+  }
+
+  // ── Export ────────────────────────────────────────────────
+  function exportCSV() {
+    if (!allData) return;
+    const rows = [["Rank","Title","Industry","Severity","Frequency","Tools","Description"]];
+    allData.painpoints.forEach(p => {
+      rows.push([p.rank, `"${p.title}"`, p.industry, p.severity, p.frequency,
+        `"${(p.tools_affected||[]).join(", ')}"`, `"${p.description}"`]);
+    });
+    download("painpoints.csv", rows.map(r => r.join(",")).join("\n"), "text/csv");
+  }
+
+  function exportJSON() {
+    if (!allData) return;
+    download("painpoints.json", JSON.stringify(allData, null, 2), "application/json");
+  }
+
+  function download(name, content, type) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([content], { type }));
+    a.download = name;
+    a.click();
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  loadData();
+</script>
+</body>
+</html>
