@@ -1,4 +1,4 @@
-// ============================================================
+// ============================================================ v2
 // AI Pain Point Intelligence Agent
 // Runs daily, scrapes platforms, analyzes with Claude,
 // saves results to results/latest.json and a dated archive
